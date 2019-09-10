@@ -205,6 +205,18 @@ class GPModel(Model):
         pred_f_mean, pred_f_var = self._build_predict(Xnew)
         return self.likelihood.predict_mean_and_var(pred_f_mean, pred_f_var)
 
+    @autoflow((settings.float_type, [None, None]))
+    def predict_y_pos(self, Xnew):
+        """
+        Compute the mean and variance of held-out data at the points Xnew
+        """
+        pred_f_mean, pred_f_var = self._build_predict_pos(Xnew)
+
+        # Originally, this line is returned. We do not want to modify the
+        # stuff, lets see later what this does
+        tmp = self.likelihood.predict_mean_and_var(pred_f_mean, pred_f_var)
+        return pred_f_mean, pred_f_var
+
     @autoflow((settings.float_type, [None, None]), (settings.float_type, [None, None]))
     def predict_density(self, Xnew, Ynew):
         """

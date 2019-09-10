@@ -133,7 +133,15 @@ class GPR(GPModel):
         # Put negative weights to zero.
         pos_kriging_weights = tf.nn.relu(kriging_weights)
 
-        fmean = self.mean_function(Xnew) + tf.matmul(pos_kriging_weights, self.Y - self.mean_function(self.X))
+        weights_sum = tf.math.reduce_sum(pos_kriging_weights, 1)
+        mod_pos_kriging_weights = (1 / tf.expand_dims(weights_sum, 1)) * pos_kriging_weights
+
+
+        # Remarkd
+        # Dim of kriging_weights is n_new_points * n_samples.
+        fmean = self.mean_function(Xnew) + tf.matmul(mod_pos_kriging_weights, self.Y - self.mean_function(self.X))
+
+        control = tf.math.reduce_sum(mod_pos_kriging_weights, 1)[:, None]
 
         return fmean, f_var
 
